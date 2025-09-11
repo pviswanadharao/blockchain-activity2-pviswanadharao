@@ -1,11 +1,12 @@
 const { ethers } = require("hardhat");
 
 // Optional: for context printing only
-const TOKEN = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const TOKEN = "<PASTE_DEPLOYED_ADDRESS_FROM_DEPLOY>";
+
 const HASHES = {
-  tx1: "0x4713693f7e84d8cd98822d6f446ae9b286bec24fba7f6f04c408fafa89a8aaf7",
-  tx2: "0x0cdf9aa0647853a854e4ce272522f24b268e7547259528af0af2a53015bb75d6",
-  tx3: "0x203f9e0c5a92b1412d46c20b3e90338093545dcfc330418182467d904520ccd3"
+  tx1: "0xb3498bd936180d8e4eb11159ed2022178cfae6298a7e67d9c2ed78bf72a2841c",
+  tx2: "0x2b0fb24b432c38c06225dfead37d4f8099b170f9a65b0d1910917ac36fe2691a",
+  tx3: "0x27d5f625f575ca17fa4b7ebddbf9ba9e70a7b898d83ef2b5889e6c0d78b8fe51",
 };
 
 const iface = new ethers.Interface([
@@ -38,6 +39,7 @@ async function analyze(hash) {
   console.log("Effective gas price:", effective.toString());
   console.log("Total fee (wei):", totalFee.toString());
 
+  // Decode Transfer/Approval events
   for (const log of rcpt.logs) {
     try {
       const parsed = iface.parseLog({ topics: log.topics, data: log.data });
@@ -53,7 +55,9 @@ async function analyze(hash) {
       } else {
         console.log("Event:", parsed.name, parsed.args);
       }
-    } catch (_) {}
+    } catch (_) {
+      /* Ignore logs from other contracts */
+    }
   }
 }
 
@@ -64,4 +68,7 @@ async function main() {
   await analyze(HASHES.tx3);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
